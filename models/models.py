@@ -12,3 +12,8 @@ class ResNet18(nn.Module):
         else:
             self.model = pretrainedmodels.__dict__["resnet34"](
             pretrained = None)
+        #TODO(Sayar): Modify last layer of network to include classes to predict
+
+    def forward(self):
+        #TODO(Sayar): Add forward pass logic
+        pass
