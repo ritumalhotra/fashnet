@@ -1,15 +1,17 @@
 # -*- coding: utf-8 -*-
-import click
 import logging
 from pathlib import Path
-from dotenv import find_dotenv, load_dotenv
-import torch
+
+import click
 import numpy as np
+import torch
 from PIL import Image
 from PIL import ImageFile
+from dotenv import find_dotenv, load_dotenv
 
 try:
     import torch_xla.core.xla_model as xm
+
     _xla_available = True
 except:
     _xla_available = False
@@ -44,6 +46,40 @@ class ClassificationDataset:
             "image": torch.tensor(image),
             "targets": torch.tensor(targets)
         }
+
+
+class ClassificationDataLoader:
+    def __init__(self, image_paths, targets, resize, augmentations=None):
+        self.image_paths = image_paths
+        self.targets = targets
+        self.resize = resize
+        self.augmentations = augmentations
+        self.dataset = ClassificationDataset(
+            image_paths=self.image_paths,
+            targets=self.targets,
+            resize=self.targets,
+            augmentations=self.augmentations
+        )
+
+    def fetch(self, batch_size, num_workers, drop_last=False, shuffle=True, tpu=False):
+        sampler = None
+        if tpu:
+            sampler = torch.utils.data.distributed.DistributedSampler(
+                self.dataset,
+                num_replicas=xm.xrt_world_size(),
+                rank=xm.get_ordinal(),
+                shuffle=shuffle,
+            )
+
+        data_loader = torch.utils.data.DataLoader(
+            self.dataset,
+            batch_size,
+            sampler=sampler,
+            drop_last=drop_last,
+            num_workers=num_workers
+        )
+
+        return data_loader
 
 
 @click.command()
