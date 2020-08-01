@@ -17,4 +17,5 @@ plotly>=4.5.0
 tensorflow>=2.1.0
 opencv-python>=4.2
 jupyter
+click>=7.2
 
