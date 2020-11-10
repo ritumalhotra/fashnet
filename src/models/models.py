@@ -12,8 +12,22 @@ class ResNet18(nn.Module):
         else:
             self.model = pretrainedmodels.__dict__["resnet18"](
             pretrained = None)
-        # TODO(Sayar): Modify last layer of network to include classes to predict
+        self.l0 = nn.Linear(512, 7)
+        self.l1 = nn.Linear(512, 3)
+        self.l2 = nn.Linear(512, 3)
+        self.l3 = nn.Linear(512, 4)
+        self.l4 = nn.Linear(512, 6)
+        self.l5 = nn.Linear(512, 3)
+        self.l6 = nn.Linear(512, 50)
 
-    def forward(self):
-        # TODO(Sayar): Add forward pass logic
-        pass
+    def forward(self, x):
+        bs, _, _, _ = x.shape
+        x = self.model.features(x)
+        x = F.adaptive_avg_pool2d(x, 1).reshape(bs, -1)
+        l0 = self.l0(x)
+        l1 = self.l1(x)
+        l2 = self.l2(x)
+        l3 = self.l3(x)
+        l4 = self.l4(x)
+        l5 = self.l5(x)
+        l6 = self.l6(x)
