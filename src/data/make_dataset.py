@@ -33,8 +33,7 @@ class ClassificationDataset:
         targets = self.targets[item]
         if self.resize is not None:
             image = image.resize(
-                (self.resize[1], self.resize[0]),
-                resample=Image.BILINEAR
+                (self.resize[1], self.resize[0]), resample=Image.BILINEAR
             )
         image = np.array(image)
         if self.augmentations is not None:
@@ -42,10 +41,7 @@ class ClassificationDataset:
             image = augmented["image"]
         image = np.transpose(image, (2, 0, 1)).astype(np.float32)
 
-        return {
-            "image": torch.tensor(image),
-            "targets": torch.tensor(targets)
-        }
+        return {"image": torch.tensor(image), "targets": torch.tensor(targets)}
 
 
 class ClassificationDataLoader:
@@ -58,7 +54,7 @@ class ClassificationDataLoader:
             image_paths=self.image_paths,
             targets=self.targets,
             resize=self.targets,
-            augmentations=self.augmentations
+            augmentations=self.augmentations,
         )
 
     def fetch(self, batch_size, num_workers, drop_last=False, shuffle=True, tpu=False):
@@ -76,25 +72,25 @@ class ClassificationDataLoader:
             batch_size,
             sampler=sampler,
             drop_last=drop_last,
-            num_workers=num_workers
+            num_workers=num_workers,
         )
 
         return data_loader
 
 
 @click.command()
-@click.argument('input_filepath', type=click.Path(exists=True))
-@click.argument('output_filepath', type=click.Path())
+@click.argument("input_filepath", type=click.Path(exists=True))
+@click.argument("output_filepath", type=click.Path())
 def main(input_filepath, output_filepath):
-    """ Runs data processing scripts to turn raw data from (../raw) into
-        cleaned data ready to be analyzed (saved in ../processed).
+    """Runs data processing scripts to turn raw data from (../raw) into
+    cleaned data ready to be analyzed (saved in ../processed).
     """
     logger = logging.getLogger(__name__)
-    logger.info('making final data set from raw data')
+    logger.info("making final data set from raw data")
 
 
-if __name__ == '__main__':
-    log_fmt = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+if __name__ == "__main__":
+    log_fmt = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
     logging.basicConfig(level=logging.INFO, format=log_fmt)
 
     # not used in this stub but often useful for finding various files
