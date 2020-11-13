@@ -1,9 +1,10 @@
 import ast
 import os
+import torch
 import torch.nn as nn
 
 
-def fetch_env_vars():
+def fetch_env_dict():
     env_dict = {}
     env_dict["DEVICE"] = os.environ.get("DEVICE")
     env_dict["TRAINING_FOLDS_CSV"] = os.environ.get("TRAINING_FOLDS_CSV")
@@ -27,3 +28,22 @@ def fetch_env_vars():
 
 def loss_fn(outputs, targets):
     return nn.CrossEntropyLoss(outputs, targets)
+
+
+def train(dataset, data_loader, model, optimizer):
+    model.train()
+    for bi, d in tqdm(
+        enumerate(data_loader), total=int(len(dataset) / data_loader.batch_size)
+    ):
+        image = d["image"]
+
+        #TODO(Sayar) Add target value mappings
+        image = image.to(DEVICE, dtype=torch.float)
+        optimizer.zero_grad()
+
+        outputs = model(image)
+        targets  =  ()
+        loss = loss_fn(outputs, targets)
+
+        loss.backward()
+        optimizer.step()
