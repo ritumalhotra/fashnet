@@ -45,17 +45,14 @@ class ClassificationDataset:
 
 class ClassificationDataLoader:
     def __init__(self, image_paths, targets, resize, augmentations=None):
-        self.image_paths = image_paths
-        self.targets = targets
-        self.resize = resize
-        self.augmentations = augmentations
         self.dataset = ClassificationDataset(
-            image_paths=self.image_paths,
-            targets=self.targets,
-            resize=self.targets,
-            augmentations=self.augmentations,
+            image_paths=image_paths,
+            targets=targets,
+            resize=targets,
+            augmentations=augmentations,
         )
 
+    @staticmethod
     def fetch(self, batch_size, num_workers, drop_last=False, shuffle=True, tpu=False):
         sampler = None
         if tpu:
