@@ -78,7 +78,7 @@ def main():
         augmentations=aug,
     )
 
-    #TODO(Sayar): Add parameters for dataloader
+    # TODO(Sayar): Add parameters for dataloader
     train_data_loader = ClassificationDataLoader(
         train_dataset, image_paths=None, targets=None, resize=None, augmentations=None
     )
@@ -99,6 +99,7 @@ def main():
             model.state_dict(),
             f"{env_dict['BASE_MODEL']}_fold{env_dict['VALIDATION_FOLDS'][0]}.bin",
         )
+
 
 if __name__ == "__main__":
     main()
