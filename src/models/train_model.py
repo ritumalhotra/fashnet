@@ -6,6 +6,7 @@ from src.data.make_dataset import ClassificationDataLoader, ClassificationDatase
 from src.models.model_dispatcher import MODEL_DISPATCHER
 import torch
 import torch.nn as nn
+import tqdm
 
 
 def fetch_env_dict():
@@ -34,7 +35,7 @@ def loss_fn(outputs, targets):
     return nn.CrossEntropyLoss(outputs, targets)
 
 
-def train(dataset, data_loader, model, optimizer):
+def train(dataset, data_loader, env_dict, model, optimizer):
     model.train()
     for bi, d in tqdm(
         enumerate(data_loader), total=int(len(dataset) / data_loader.batch_size)
@@ -42,7 +43,7 @@ def train(dataset, data_loader, model, optimizer):
         image = d["image"]
 
         # TODO(Sayar) Add target value mappings
-        image = image.to(DEVICE, dtype=torch.float)
+        image = image.to(env_dict["DEVICE"], dtype=torch.float)
         optimizer.zero_grad()
 
         outputs = model(image)
@@ -70,8 +71,8 @@ def main():
     if torch.cuda.device_count() > 1:
         model = nn.DataParallel(model)
 
-    for epoch in range(EPOCHS):
-        train(train_data_loader, model, optimizer)
+    for epoch in range(env_dict["EPOCHS"]):
+        train(train_dataset, train_data_loader, env_dict, model, optimizer)
         # TODO(Sayar): Add evaluation dataset, dataloader
         val_score = evaluate(valid_dataset, valid_data_loader, model)
         scheduler.step(val_score)
