@@ -2,10 +2,12 @@ import ast
 import os
 
 from numpy.core.fromnumeric import resize
-from src.data.make_dataset import ClassificationDataLoader, ClassificationDataset
+from src.data.dataset import ClassificationDataLoader, ClassificationDataset
 from src.models.model_dispatcher import MODEL_DISPATCHER
 import torch
 import torch.nn as nn
+import tqdm
+import albumentations as A
 
 
 def fetch_env_dict():
@@ -34,7 +36,7 @@ def loss_fn(outputs, targets):
     return nn.CrossEntropyLoss(outputs, targets)
 
 
-def train(dataset, data_loader, model, optimizer):
+def train(dataset, data_loader, env_dict, model, optimizer):
     model.train()
     for bi, d in tqdm(
         enumerate(data_loader), total=int(len(dataset) / data_loader.batch_size)
@@ -42,7 +44,7 @@ def train(dataset, data_loader, model, optimizer):
         image = d["image"]
 
         # TODO(Sayar) Add target value mappings
-        image = image.to(DEVICE, dtype=torch.float)
+        image = image.to(env_dict["DEVICE"], dtype=torch.float)
         optimizer.zero_grad()
 
         outputs = model(image)
@@ -58,9 +60,27 @@ def main():
     model = MODEL_DISPATCHER[env_dict["BASE_MODEL"]](pretrained=True)
     model.to(env_dict["DEVICE"])
 
-    #TODO(Sayar): Add parameters for dataloader
+    aug = A.Compose(
+        [
+            A.Resize(200, 300),
+            A.CenterCrop(100, 100),
+            A.RandomCrop(80, 80),
+            A.HorizontalFlip(p=0.5),
+            A.Rotate(limit=(-90, 90)),
+            A.VerticalFlip(p=0.5),
+            A.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
+        ]
+    )
+    train_dataset = ClassificationDataset(
+        image_paths=image_paths,
+        targets=targets,
+        resize=targets,
+        augmentations=aug,
+    )
+
+    # TODO(Sayar): Add parameters for dataloader
     train_data_loader = ClassificationDataLoader(
-        image_paths=None, targets=None, resize=None, augmentations=None
+        train_dataset, image_paths=None, targets=None, resize=None, augmentations=None
     )
 
     optimizer = torch.optim.Adam(model.parameters(), lr=1e-4)
@@ -70,8 +90,8 @@ def main():
     if torch.cuda.device_count() > 1:
         model = nn.DataParallel(model)
 
-    for epoch in range(EPOCHS):
-        train(train_data_loader, model, optimizer)
+    for epoch in range(env_dict["EPOCHS"]):
+        train(train_dataset, train_data_loader, env_dict, model, optimizer)
         # TODO(Sayar): Add evaluation dataset, dataloader
         val_score = evaluate(valid_dataset, valid_data_loader, model)
         scheduler.step(val_score)
@@ -79,6 +99,7 @@ def main():
             model.state_dict(),
             f"{env_dict['BASE_MODEL']}_fold{env_dict['VALIDATION_FOLDS'][0]}.bin",
         )
+
 
 if __name__ == "__main__":
     main()
