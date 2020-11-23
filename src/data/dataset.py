@@ -47,16 +47,15 @@ class ClassificationDataset:
         image = np.transpose(image, (2, 0, 1)).astype(np.float32)
 
         return {
-            "image": torch.tensor(image), 
+            "image": torch.tensor(image),
             "categories": torch.tensor(self.categories[item], dtype=torch.long),
             "pattern": torch.tensor(self.pattern[item], dtype=torch.long),
             "sleeve": torch.tensor(self.sleeve[item], dtype=torch.long),
             "length": torch.tensor(self.length[item], dtype=torch.long),
             "neckline": torch.tensor(self.neckline[item], dtype=torch.long),
             "material": torch.tensor(self.material[item], dtype=torch.long),
-            "fit": torch.tensor(self.fit[item], dtype=torch.long)
+            "fit": torch.tensor(self.fit[item], dtype=torch.long),
         }
-
 
 
 class ClassificationDataLoader:

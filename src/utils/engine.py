@@ -1,4 +1,3 @@
-
 import tqdm
 import torch
 
@@ -7,6 +6,7 @@ import torch.nn as nn
 
 def loss_fn(outputs, targets):
     return nn.CrossEntropyLoss(outputs, targets)
+
 
 def train(dataset, data_loader, env_dict, model, optimizer):
     model.train()

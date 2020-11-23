@@ -47,7 +47,10 @@ def main():
     aug = A.Compose(
         [
             A.Normalize(
-                env_dict["MODEL_MEAN"], env_dict["MODEL_STD"], max_pixel_value=255.0, always_apply=True
+                env_dict["MODEL_MEAN"],
+                env_dict["MODEL_STD"],
+                max_pixel_value=255.0,
+                always_apply=True,
             ),
             A.CenterCrop(100, 100),
             A.RandomCrop(80, 80),
@@ -65,7 +68,10 @@ def main():
     )
 
     train_data_loader = torch.utils.data.DataLoader(
-        train_dataset, batch_size=env_dict["TRAIN_BATCH_SIZE"], shuffle=True, num_workers=4
+        train_dataset,
+        batch_size=env_dict["TRAIN_BATCH_SIZE"],
+        shuffle=True,
+        num_workers=4,
     )
 
     valid_dataset = ClassificationDataset(
@@ -76,7 +82,10 @@ def main():
     )
 
     valid_data_loader = torch.utils.data.DataLoader(
-        valid_dataset, batch_size=env_dict["VALID_BATCH_SIZE"], shuffle=False, num_workers=4
+        valid_dataset,
+        batch_size=env_dict["VALID_BATCH_SIZE"],
+        shuffle=False,
+        num_workers=4,
     )
 
     optimizer = torch.optim.Adam(model.parameters(), lr=1e-4)
@@ -88,7 +97,7 @@ def main():
 
     for epoch in range(env_dict["EPOCHS"]):
         train(train_dataset, train_data_loader, env_dict, model, optimizer)
-        val_score = evaluate(valid_dataset, valid_data_loader, env_dict,  model)
+        val_score = evaluate(valid_dataset, valid_data_loader, env_dict, model)
         scheduler.step(val_score)
         torch.save(
             model.state_dict(),
