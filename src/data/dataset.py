@@ -6,7 +6,7 @@ import numpy as np
 import torch
 from PIL import Image
 from PIL import ImageFile
-from dotenv import find_dotenv, load_dotenv
+# from dotenv import find_dotenv, load_dotenv
 
 try:
     import torch_xla.core.xla_model as xm

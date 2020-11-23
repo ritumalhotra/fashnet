@@ -1,9 +1,10 @@
 import ast
 import os
 
+import pandas as pd
 from numpy.core.fromnumeric import resize
-from src.data.dataset import ClassificationDataLoader, ClassificationDataset
-from src.models.model_dispatcher import MODEL_DISPATCHER
+from data.dataset import ClassificationDataLoader, ClassificationDataset
+from models.model_dispatcher import MODEL_DISPATCHER
 import torch
 import torch.nn as nn
 import tqdm
@@ -86,7 +87,9 @@ def main():
     model.to(env_dict["DEVICE"])
 
     #TODO(Sayar) Add image and target paths
-    df = pd.read_csv("")
+    df = pd.read_csv("/Users/Banner/Downloads/train_full.csv")
+    image_paths = df["img_path"].values.tolist()
+    targets = {col:df[col].values for col in df.columns.tolist()}
 
     aug = A.Compose(
         [
