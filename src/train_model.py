@@ -3,12 +3,14 @@ import os
 
 import pandas as pd
 from numpy.core.fromnumeric import resize
-from data.dataset import ClassificationDataLoader, ClassificationDataset
-from models.model_dispatcher import MODEL_DISPATCHER
 import torch
 import torch.nn as nn
 import tqdm
 import albumentations as A
+
+from utils.engine import train, evaluate
+from data.dataset import ClassificationDataLoader, ClassificationDataset
+from models.model_dispatcher import MODEL_DISPATCHER
 
 
 def fetch_env_dict():
@@ -33,67 +35,18 @@ def fetch_env_dict():
     return env_dict
 
 
-def loss_fn(outputs, targets):
-    return nn.CrossEntropyLoss(outputs, targets)
-
-
-def train(dataset, data_loader, env_dict, model, optimizer):
-    model.train()
-    for bi, d in tqdm(
-        enumerate(data_loader), total=int(len(dataset) / data_loader.batch_size)
-    ):
-        image = d["image"]
-
-        # TODO(Sayar) Add target value mappings
-        image = image.to(env_dict["DEVICE"], dtype=torch.float)
-        optimizer.zero_grad()
-
-        outputs = model(image)
-        targets = ()
-        loss = loss_fn(outputs, targets)
-
-        loss.backward()
-        optimizer.step()
-
-
-def evaluate(data_loader, model, device):
-    model.eval()
-
-    final_targets = []
-    final_outputs = []
-
-    with torch.no_grad():
-
-        for data in data_loader:
-            inputs = data["image"]
-            targets = data["targets"]
-            inputs = inputs.to(device, dtype=torch.float)
-            targets = inputs.to(device, dtype=torch.float)
-
-            output = model(input)
-
-            targets = targets.detach().cpu().numpy().tolist()
-            output = output.detach().cpu().numpy().tolist()
-
-            final_targets.extend(targets)
-            final_outputs.extend(output)
-
-    return final_outputs, final_targets
-    
-
 def main():
     env_dict = fetch_env_dict()
     model = MODEL_DISPATCHER[env_dict["BASE_MODEL"]](pretrained=True)
     model.to(env_dict["DEVICE"])
 
-    #TODO(Sayar) Add image and target paths
+    # TODO(Sayar) Add image and target paths
     df = pd.read_csv("/Users/Banner/Downloads/train_full.csv")
     image_paths = df["img_path"].values.tolist()
-    targets = {col:df[col].values for col in df.columns.tolist()}
+    targets = {col: df[col].values for col in df.columns.tolist()}
 
     aug = A.Compose(
         [
-            A.Resize(200, 300),
             A.CenterCrop(100, 100),
             A.RandomCrop(80, 80),
             A.HorizontalFlip(p=0.5),
@@ -110,8 +63,8 @@ def main():
     )
 
     # TODO(Sayar): Add parameters for dataloader
-    train_data_loader = ClassificationDataLoader(
-        train_dataset, image_paths=None, targets=None, resize=None, augmentations=None
+    train_data_loader = torch.utils.data.DataLoader(
+        train_dataset, batch_size=16, shuffle=True, num_workers=4
     )
 
     valid_dataset = ClassificationDataset(
@@ -121,8 +74,8 @@ def main():
         augmentations=aug,
     )
 
-    valid_data_loader = ClassificationDataLoader(
-        train_dataset, image_paths=None, targets=None, resize=None, augmentations=None
+    valid_data_loader = torch.utils.data.DataLoader(
+        valid_dataset, batch_size=16, shuffle=False, num_workers=4
     )
 
     optimizer = torch.optim.Adam(model.parameters(), lr=1e-4)
