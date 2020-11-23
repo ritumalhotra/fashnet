@@ -7,7 +7,6 @@ import torch
 from PIL import Image
 from PIL import ImageFile
 
-# from dotenv import find_dotenv, load_dotenv
 
 try:
     import torch_xla.core.xla_model as xm
@@ -21,7 +20,13 @@ ImageFile.LOAD_TRUNCATED_IMAGES = True
 class ClassificationDataset:
     def __init__(self, image_paths, targets, resize, augmentations=None):
         self.image_paths = image_paths
-        self.targets = targets
+        self.categories = targets["Category"]
+        self.pattern = targets["Pattern"]
+        self.sleeve = targets["Sleeve"]
+        self.length = targets["Length"]
+        self.neckline = targets["Neckline"]
+        self.material = targets["Material"]
+        self.fit = targets["Fit"]
         self.resize = resize
         self.augmentations = augmentations
 
@@ -41,7 +46,17 @@ class ClassificationDataset:
             image = augmented["image"]
         image = np.transpose(image, (2, 0, 1)).astype(np.float32)
 
-        return {"image": torch.tensor(image), "targets": torch.tensor(targets)}
+        return {
+            "image": torch.tensor(image), 
+            "categories": torch.tensor(self.categories[item], dtype=torch.long),
+            "pattern": torch.tensor(self.pattern[item], dtype=torch.long),
+            "sleeve": torch.tensor(self.sleeve[item], dtype=torch.long),
+            "length": torch.tensor(self.length[item], dtype=torch.long),
+            "neckline": torch.tensor(self.neckline[item], dtype=torch.long),
+            "material": torch.tensor(self.material[item], dtype=torch.long),
+            "fit": torch.tensor(self.fit[item], dtype=torch.long)
+        }
+
 
 
 class ClassificationDataLoader:
@@ -68,28 +83,3 @@ class ClassificationDataLoader:
         )
 
         return data_loader
-
-
-@click.command()
-@click.argument("input_filepath", type=click.Path(exists=True))
-@click.argument("output_filepath", type=click.Path())
-def main(input_filepath, output_filepath):
-    """Runs data processing scripts to turn raw data from (../raw) into
-    cleaned data ready to be analyzed (saved in ../processed).
-    """
-    logger = logging.getLogger(__name__)
-    logger.info("making final data set from raw data")
-
-
-if __name__ == "__main__":
-    log_fmt = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-    logging.basicConfig(level=logging.INFO, format=log_fmt)
-
-    # not used in this stub but often useful for finding various files
-    project_dir = Path(__file__).resolve().parents[2]
-
-    # find .env automagically by walking up directories until it's found, then
-    # load up the .env entries as environment variables
-    load_dotenv(find_dotenv())
-
-    main()

@@ -14,39 +14,65 @@ def train(dataset, data_loader, env_dict, model, optimizer):
         enumerate(data_loader), total=int(len(dataset) / data_loader.batch_size)
     ):
         image = d["image"]
+        categories = d["categories"]
+        pattern = d["pattern"]
+        sleeve = d["sleeve"]
+        length = d["length"]
+        neckline = d["neckline"]
+        material = d["material"]
+        fit = d["fit"]
 
-        # TODO(Sayar) Add target value mappings
         image = image.to(env_dict["DEVICE"], dtype=torch.float)
+        categories = categories.to(env_dict["DEVICE"], dtype=torch.float)
+        pattern = pattern.to(env_dict["DEVICE"], dtype=torch.float)
+        sleeve = sleeve.to(env_dict["DEVICE"], dtype=torch.float)
+        length = length.to(env_dict["DEVICE"], dtype=torch.float)
+        neckline = neckline.to(env_dict["DEVICE"], dtype=torch.float)
+        material = material.to(env_dict["DEVICE"], dtype=torch.float)
+        fit = fit.to(env_dict["DEVICE"], dtype=torch.float)
+
         optimizer.zero_grad()
 
         outputs = model(image)
-        targets = ()
+        targets = (categories, pattern, sleeve, length, neckline, material, fit)
         loss = loss_fn(outputs, targets)
 
         loss.backward()
         optimizer.step()
 
 
-def evaluate(data_loader, model, device):
+@torch.no_grad()
+def evaluate(dataset, data_loader, env_dict, model):
     model.eval()
 
-    final_targets = []
-    final_outputs = []
+    final_loss = 0
+    counter = 0
 
-    with torch.no_grad():
+    for bi, d in tqdm(
+        enumerate(data_loader), total=int(len(dataset) / data_loader.batch_size)
+    ):
+        counter += 1
+        image = d["image"]
+        categories = d["categories"]
+        pattern = d["pattern"]
+        sleeve = d["sleeve"]
+        length = d["length"]
+        neckline = d["neckline"]
+        material = d["material"]
+        fit = d["fit"]
 
-        for data in data_loader:
-            inputs = data["image"]
-            targets = data["targets"]
-            inputs = inputs.to(device, dtype=torch.float)
-            targets = inputs.to(device, dtype=torch.float)
+        image = image.to(env_dict["DEVICE"], dtype=torch.float)
+        categories = categories.to(env_dict["DEVICE"], dtype=torch.float)
+        pattern = pattern.to(env_dict["DEVICE"], dtype=torch.float)
+        sleeve = sleeve.to(env_dict["DEVICE"], dtype=torch.float)
+        length = length.to(env_dict["DEVICE"], dtype=torch.float)
+        neckline = neckline.to(env_dict["DEVICE"], dtype=torch.float)
+        material = material.to(env_dict["DEVICE"], dtype=torch.float)
+        fit = fit.to(env_dict["DEVICE"], dtype=torch.float)
 
-            output = model(input)
+        outputs = model(image)
+        targets = (categories, pattern, sleeve, length, neckline, material, fit)
+        loss = loss_fn(outputs, targets)
+        final_loss += loss
 
-            targets = targets.detach().cpu().numpy().tolist()
-            output = output.detach().cpu().numpy().tolist()
-
-            final_targets.extend(targets)
-            final_outputs.extend(output)
-
-    return final_outputs, final_targets
+    return final_loss / counter
