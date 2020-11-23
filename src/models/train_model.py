@@ -55,10 +55,38 @@ def train(dataset, data_loader, env_dict, model, optimizer):
         optimizer.step()
 
 
+def evaluate(data_loader, model, device):
+    model.eval()
+
+    final_targets = []
+    final_outputs = []
+
+    with torch.no_grad():
+
+        for data in data_loader:
+            inputs = data["image"]
+            targets = data["targets"]
+            inputs = inputs.to(device, dtype=torch.float)
+            targets = inputs.to(device, dtype=torch.float)
+
+            output = model(input)
+
+            targets = targets.detach().cpu().numpy().tolist()
+            output = output.detach().cpu().numpy().tolist()
+
+            final_targets.extend(targets)
+            final_outputs.extend(output)
+
+    return final_outputs, final_targets
+    
+
 def main():
     env_dict = fetch_env_dict()
     model = MODEL_DISPATCHER[env_dict["BASE_MODEL"]](pretrained=True)
     model.to(env_dict["DEVICE"])
+
+    #TODO(Sayar) Add image and target paths
+    df = pd.read_csv("")
 
     aug = A.Compose(
         [
@@ -74,12 +102,23 @@ def main():
     train_dataset = ClassificationDataset(
         image_paths=image_paths,
         targets=targets,
-        resize=targets,
+        resize=(env_dict["IMG_HEIGHT"], env_dict["IMG_WIDTH"]),
         augmentations=aug,
     )
 
     # TODO(Sayar): Add parameters for dataloader
     train_data_loader = ClassificationDataLoader(
+        train_dataset, image_paths=None, targets=None, resize=None, augmentations=None
+    )
+
+    valid_dataset = ClassificationDataset(
+        image_paths=image_paths,
+        targets=targets,
+        resize=(env_dict["IMG_HEIGHT"], env_dict["IMG_WIDTH"]),
+        augmentations=aug,
+    )
+
+    valid_data_loader = ClassificationDataLoader(
         train_dataset, image_paths=None, targets=None, resize=None, augmentations=None
     )
 
@@ -92,7 +131,6 @@ def main():
 
     for epoch in range(env_dict["EPOCHS"]):
         train(train_dataset, train_data_loader, env_dict, model, optimizer)
-        # TODO(Sayar): Add evaluation dataset, dataloader
         val_score = evaluate(valid_dataset, valid_data_loader, model)
         scheduler.step(val_score)
         torch.save(
