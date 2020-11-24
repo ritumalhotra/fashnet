@@ -41,8 +41,10 @@ def main():
     model.to(env_dict["DEVICE"])
 
     df = pd.read_csv("/Users/Banner/Downloads/train_full.csv")
-    image_paths = df["img_path"].values.tolist()
-    targets = {col: df[col].values for col in df.columns.tolist()}
+    #TODO(Sayar): Remove hacky code here
+    train_image_paths = df[df["kfold"].isin(env_dict["TRAINING_FOLDS"])]["img_path"].values.tolist()
+    val_image_paths = df[df["kfold"].isin(env_dict["VALIDATION_FOLDS"])]["img_path"].values.tolist()
+    targets = {col: df[col].values for col in df.columns.tolist()[1:-1]}
 
     aug = A.Compose(
         [
@@ -61,7 +63,7 @@ def main():
         ]
     )
     train_dataset = ClassificationDataset(
-        image_paths=image_paths,
+        image_paths=train_image_paths,
         targets=targets,
         resize=(env_dict["IMG_HEIGHT"], env_dict["IMG_WIDTH"]),
         augmentations=aug,
@@ -75,7 +77,7 @@ def main():
     )
 
     valid_dataset = ClassificationDataset(
-        image_paths=image_paths,
+        image_paths=val_image_paths,
         targets=targets,
         resize=(env_dict["IMG_HEIGHT"], env_dict["IMG_WIDTH"]),
         augmentations=aug,
