@@ -13,6 +13,7 @@ def train(dataset, data_loader, env_dict, model, optimizer):
     for bi, d in tqdm(
         enumerate(data_loader), total=int(len(dataset) / data_loader.batch_size)
     ):
+        #TODO(Sayar): iterate instead of adding each var sequentially
         image = d["image"]
         categories = d["categories"]
         pattern = d["pattern"]
