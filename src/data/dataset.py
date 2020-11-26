@@ -35,7 +35,7 @@ class ClassificationDataset:
 
     def __getitem__(self, item):
         image = Image.open(self.image_paths[item])
-        targets = self.targets[item]
+        image = image.convert("RGB")
         if self.resize is not None:
             image = image.resize(
                 (self.resize[1], self.resize[0]), resample=Image.BILINEAR
