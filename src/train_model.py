@@ -20,6 +20,7 @@ def fetch_env_dict():
     env_dict["IMG_HEIGHT"] = int(os.environ.get("IMG_HEIGHT"))
     env_dict["IMG_WIDTH"] = int(os.environ.get("IMG_WIDTH"))
     env_dict["EPOCHS"] = int(os.environ.get("EPOCHS"))
+    env_dict["IMAGE_PATH"] = os.environ.get("IMAGE_PATH")
 
     env_dict["TRAIN_BATCH_SIZE"] = int(os.environ.get("TRAIN_BATCH_SIZE"))
     env_dict["VALID_BATCH_SIZE"] = int(os.environ.get("VALID_BATCH_SIZE"))
@@ -44,6 +45,10 @@ def main():
     #TODO(Sayar): Remove hacky code here
     train_image_paths = df[df["kfold"].isin(env_dict["TRAINING_FOLDS"])]["img_path"].values.tolist()
     val_image_paths = df[df["kfold"].isin(env_dict["VALIDATION_FOLDS"])]["img_path"].values.tolist()
+
+    train_image_paths = [os.path.join(env_dict["IMAGE_PATH"], img_id) for img_id in train_image_paths]
+    val_image_paths = [os.path.join(env_dict["IMAGE_PATH"], img_id) for img_id in val_image_paths]
+
     targets = {col: df[col].values for col in df.columns.tolist()[1:-1]}
 
     aug = A.Compose(

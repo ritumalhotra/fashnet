@@ -1,3 +1,3 @@
-from models import ResNet18
+from . import model
 
-MODEL_DISPATCHER = {"resnet18": ResNet18}
+MODEL_DISPATCHER = {"resnet18": model.ResNet18}

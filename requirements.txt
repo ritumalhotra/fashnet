@@ -1,21 +1,9 @@
-# local package
--e .
-
-# external requirements
-click
-Sphinx
-coverage
-awscli
-flake8
-python-dotenv>=0.5.1
-pandas>=1.0.1
-numpy>=1.18.1
-Pillow>=5.1.0
-pytest>=3.5.0
-torch>=1.4.0
-plotly>=4.5.0
-tensorflow>=2.1.0
-opencv-python>=4.2
-jupyter
-click>=7.2
-
+pandas==1.1.2
+click==7.1.2
+iterative_stratification==0.1.6
+numpy==1.19.2
+tqdm==4.51.0
+pretrainedmodels==0.7.4
+albumentations==0.4.3
+torch==1.6.0
+Pillow==8.0.1
