@@ -16,11 +16,17 @@ def main(image_path_file, attribute_file, category_file, destpath, filename):
     df3 = pd.read_csv(category_file, sep=" ")
     result = pd.concat([df1, df2, df3], ignore_index=True, axis=1)
     result["Pattern"] = result.iloc[:, 1:8].idxmax(1)
+    result["Pattern"] = result["Pattern"] - 1
     result["Sleeve"] = result.iloc[:, 8:11].idxmax(1)
+    result["Sleeve"] = result["Sleeve"] - 8
     result["Length"] = result.iloc[:, 11:14].idxmax(1)
+    result["Length"] = result["Length"] - 11
     result["Neckline"] = result.iloc[:, 14:18].idxmax(1)
+    result["Neckline"] = result["Neckline"] - 14
     result["Material"] = result.iloc[:, 18:24].idxmax(1)
+    result["Material"] = result["Material"] - 18
     result["Fit"] = result.iloc[:, 24:27].idxmax(1)
+    result["Fit"] = result["Fit"] - 24
     result.drop(list(range(1, 28)), axis=1, inplace=True)
     result.columns = ["img_path", "Category"] + result.columns.tolist()[2:]
 
