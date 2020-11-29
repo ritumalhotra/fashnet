@@ -106,6 +106,7 @@ def main():
         train(train_dataset, train_data_loader, env_dict, model, optimizer)
         val_score = evaluate(valid_dataset, valid_data_loader, env_dict, model)
         scheduler.step(val_score)
+        print(f"EPOCH: {epoch}, validation error: {val_score}")
         torch.save(
             model.state_dict(),
             f"{env_dict['BASE_MODEL']}_fold{env_dict['VALIDATION_FOLDS'][0]}.bin",
