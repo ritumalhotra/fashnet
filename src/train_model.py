@@ -16,7 +16,6 @@ from models.model_dispatcher import MODEL_DISPATCHER
 def fetch_env_dict():
     env_dict = {}
     env_dict["DEVICE"] = os.environ.get("DEVICE")
-    env_dict["TRAINING_FOLDS_CSV"] = os.environ.get("TRAINING_FOLDS_CSV")
     env_dict["IMG_HEIGHT"] = int(os.environ.get("IMG_HEIGHT"))
     env_dict["IMG_WIDTH"] = int(os.environ.get("IMG_WIDTH"))
     env_dict["EPOCHS"] = int(os.environ.get("EPOCHS"))
@@ -41,13 +40,14 @@ def main():
     model = MODEL_DISPATCHER[env_dict["BASE_MODEL"]](pretrained=True)
     model.to(env_dict["DEVICE"])
 
-    df = pd.read_csv("/Users/Banner/Downloads/train_full.csv")
+    parent = os.path.abspath(os.path.join(os.getcwd(), os.pardir))
+    df = pd.read_csv(os.path.join(parent, "data/train_full.csv"))
     #TODO(Sayar): Remove hacky code here
     train_image_paths = df[df["kfold"].isin(env_dict["TRAINING_FOLDS"])]["img_path"].values.tolist()
     val_image_paths = df[df["kfold"].isin(env_dict["VALIDATION_FOLDS"])]["img_path"].values.tolist()
 
-    train_image_paths = [os.path.join(env_dict["IMAGE_PATH"], img_id) for img_id in train_image_paths]
-    val_image_paths = [os.path.join(env_dict["IMAGE_PATH"], img_id) for img_id in val_image_paths]
+    train_image_paths = [os.path.join(os.path.join(parent, "data"), img_id) for img_id in train_image_paths]
+    val_image_paths = [os.path.join(os.path.join(parent, "data"), img_id) for img_id in val_image_paths]
 
     targets = {col: df[col].values for col in df.columns.tolist()[1:-1]}
 
@@ -109,7 +109,7 @@ def main():
         print(f"EPOCH: {epoch}, validation error: {val_score}")
         torch.save(
             model.state_dict(),
-            f"{env_dict['BASE_MODEL']}_fold{env_dict['VALIDATION_FOLDS'][0]}.bin",
+            os.path.join(parent, f"models/{env_dict['BASE_MODEL']}_fold{env_dict['VALIDATION_FOLDS'][0]}.bin"),
         )
 
 
