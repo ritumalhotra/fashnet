@@ -72,16 +72,16 @@ def evaluate(dataset, data_loader, env_dict, model):
         fit = d["fit"]
 
         image = image.to(env_dict["DEVICE"], dtype=torch.float)
-        categories = categories.to(env_dict["DEVICE"], dtype=torch.float)
-        pattern = pattern.to(env_dict["DEVICE"], dtype=torch.float)
-        sleeve = sleeve.to(env_dict["DEVICE"], dtype=torch.float)
-        length = length.to(env_dict["DEVICE"], dtype=torch.float)
-        neckline = neckline.to(env_dict["DEVICE"], dtype=torch.float)
-        material = material.to(env_dict["DEVICE"], dtype=torch.float)
-        fit = fit.to(env_dict["DEVICE"], dtype=torch.float)
+        categories = categories.to(env_dict["DEVICE"], dtype=torch.long)
+        pattern = pattern.to(env_dict["DEVICE"], dtype=torch.long)
+        sleeve = sleeve.to(env_dict["DEVICE"], dtype=torch.long)
+        length = length.to(env_dict["DEVICE"], dtype=torch.long)
+        neckline = neckline.to(env_dict["DEVICE"], dtype=torch.long)
+        material = material.to(env_dict["DEVICE"], dtype=torch.long)
+        fit = fit.to(env_dict["DEVICE"], dtype=torch.long)
 
         outputs = model(image)
-        targets = (categories, pattern, sleeve, length, neckline, material, fit)
+        targets = (pattern, sleeve, length, neckline, material, fit, categories)
         loss = loss_fn(outputs, targets)
         final_loss += loss
 
