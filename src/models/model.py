@@ -48,7 +48,6 @@ class ResNet34(nn.Module):
         self.l5 = nn.Linear(512, 3)
         self.l6 = nn.Linear(512, 50)
 
-
     def forward(self, x):
         bs, _, _, _ = x.shape
         x = self.model.features(x)

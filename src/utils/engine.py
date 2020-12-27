@@ -17,12 +17,13 @@ def loss_fn(outputs, targets):
 
     return (l1 + l2 + l3 + l4 + l5 + l6 + l7) / 7
 
+
 def train(dataset, data_loader, env_dict, model, optimizer):
     model.train()
     for bi, d in tqdm(
         enumerate(data_loader), total=int(len(dataset) / data_loader.batch_size)
     ):
-        #TODO(Sayar): iterate instead of adding each var sequentially
+        # TODO(Sayar): iterate instead of adding each var sequentially
         image = d["image"]
         categories = d["categories"]
         pattern = d["pattern"]

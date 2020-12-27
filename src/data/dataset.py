@@ -57,14 +57,15 @@ class ClassificationDataset:
             "fit": torch.tensor(self.fit[item], dtype=torch.long),
         }
 
+
 class TestClassificationDataset:
     def __init__(self, image_paths, resize, augmentations=None):
         self.image_paths = image_paths
         self.aug = augmentations
-    
+
     def __len__(self):
         return len(self.image_paths)
-    
+
     def __getitem__(self, item):
         img_id = self.image_paths[item]
         image = Image.open(img_id)
@@ -79,10 +80,8 @@ class TestClassificationDataset:
             image = augmented["image"]
         image = np.transpose(image, (2, 0, 1)).astype(np.float32)
 
-        return {
-            "image": torch.tensor(image),
-            "image_id": img_id
-        }
+        return {"image": torch.tensor(image), "image_id": img_id}
+
 
 class ClassificationDataLoader:
     def __init__(self, dataset, image_paths, targets, resize, augmentations=None):
