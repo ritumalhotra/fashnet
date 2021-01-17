@@ -42,12 +42,21 @@ def main():
 
     parent = os.path.abspath(os.path.join(os.getcwd(), os.pardir))
     df = pd.read_csv(os.path.join(parent, "data/train_full.csv"))
-    #TODO(Sayar): Remove hacky code here
-    train_image_paths = df[df["kfold"].isin(env_dict["TRAINING_FOLDS"])]["img_path"].values.tolist()
-    val_image_paths = df[df["kfold"].isin(env_dict["VALIDATION_FOLDS"])]["img_path"].values.tolist()
+    # TODO(Sayar): Remove hacky code here
+    train_image_paths = df[df["kfold"].isin(env_dict["TRAINING_FOLDS"])][
+        "img_path"
+    ].values.tolist()
+    val_image_paths = df[df["kfold"].isin(env_dict["VALIDATION_FOLDS"])][
+        "img_path"
+    ].values.tolist()
 
-    train_image_paths = [os.path.join(os.path.join(parent, "data"), img_id) for img_id in train_image_paths]
-    val_image_paths = [os.path.join(os.path.join(parent, "data"), img_id) for img_id in val_image_paths]
+    train_image_paths = [
+        os.path.join(os.path.join(parent, "data"), img_id)
+        for img_id in train_image_paths
+    ]
+    val_image_paths = [
+        os.path.join(os.path.join(parent, "data"), img_id) for img_id in val_image_paths
+    ]
 
     targets = {col: df[col].values for col in df.columns.tolist()[1:-1]}
 
@@ -109,7 +118,10 @@ def main():
         print(f"EPOCH: {epoch}, validation error: {val_score}")
         torch.save(
             model.state_dict(),
-            os.path.join(parent, f"models/{env_dict['BASE_MODEL']}_fold{env_dict['VALIDATION_FOLDS'][0]}.bin"),
+            os.path.join(
+                parent,
+                f"models/{env_dict['BASE_MODEL']}_fold{env_dict['VALIDATION_FOLDS'][0]}.bin",
+            ),
         )
 
 
