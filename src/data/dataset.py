@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import logging
+import os
 from pathlib import Path
 import click
 import numpy as np
@@ -62,25 +63,28 @@ class TestClassificationDataset:
     def __init__(self, image_paths, resize, augmentations=None):
         self.image_paths = image_paths
         self.aug = augmentations
+        self.resize = resize
 
     def __len__(self):
         return len(self.image_paths)
 
     def __getitem__(self, item):
+        # TODO(Sayar) Handle parent var better
+        parent = "/Users/Banner/Downloads"
         img_id = self.image_paths[item]
-        image = Image.open(img_id)
+        image = Image.open(os.path.join(parent, img_id))
         image = image.convert("RGB")
         if self.resize is not None:
             image = image.resize(
                 (self.resize[1], self.resize[0]), resample=Image.BILINEAR
             )
         image = np.array(image)
-        if self.augmentations is not None:
-            augmented = self.augmentations(image=image)
+        if self.aug is not None:
+            augmented = self.aug(image=image)
             image = augmented["image"]
         image = np.transpose(image, (2, 0, 1)).astype(np.float32)
 
-        return {"image": torch.tensor(image), "image_id": img_id}
+        return {"image": torch.tensor(image, dtype=torch.float), "image_id": img_id}
 
 
 class ClassificationDataLoader:
